@@ -54,7 +54,8 @@ These are required for the Last.fm API. You can get them by creating an applicat
 - Create a docker-compose.yml file in the root of the project and then:
 
 ```bash
-  docker compose up --build
+  docker compose up -d
+  docker compose logs -f
 ```
 
 ### Tampermonkey script
