@@ -1,16 +1,17 @@
 import "dotenv/config";
 import fetch from "node-fetch";
-import express, { RequestHandler } from "express";
+import express from "express";
 import md5 from "md5";
 
 import type { Session, Data } from "./scrobbler.types.ts";
 
-const app = express();
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.API_KEY!;
 const AUTH_URL = "https://www.last.fm/api/auth/";
 const API_ENDPOINT = "https://ws.audioscrobbler.com/2.0/";
 const SHARED_SECRET = process.env.SHARED_SECRET;
+
+const app = express();
 
 let session: Session | null = null;
 
