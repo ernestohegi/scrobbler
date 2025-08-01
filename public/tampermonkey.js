@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  Send YouTube Music tracks to your Last.fm scrobbler backend
-// @author       You
+// @version      0.4
+// @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralized fetcher
+// @author       Ernesto Hegi
 // @match        https://music.youtube.com/*
 // @grant        none
 // ==/UserScript==
@@ -12,11 +12,30 @@
   "use strict";
 
   let lastTrack = "";
+  let scrobbleTimeout = null;
 
-  const sendToBackend = (artist, track) => {
-    console.log("Sending to backend:", artist, track);
+  const SCROBBLE_THRESHOLD_SECONDS = 120; // 2 minutes max
+  const MINIMUM_SCROBBLE_LENGTH_SECONDS = 30; // minimum track length to scrobble
+  const BACKEND_URL = "http://localhost:3000";
 
-    fetch("http://localhost:3000/scrobble", {
+  function parseDuration(durationStr) {
+    if (!durationStr) return 0;
+
+    const parts = durationStr.split(":").map(Number);
+
+    if (parts.length === 2) {
+      return parts[0] * 60 + parts[1];
+    } else if (parts.length === 3) {
+      return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    }
+
+    return 0;
+  }
+
+  function sendToBackend(endpoint, artist, track) {
+    console.log(`Sending to ${endpoint}:`, artist, track);
+
+    return fetch(`${BACKEND_URL}/${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -24,8 +43,8 @@
         track,
         timestamp: Math.floor(Date.now() / 1000),
       }),
-    }).catch((err) => console.error("Failed to scrobble:", err));
-  };
+    }).catch((err) => console.error(`Failed to send to ${endpoint}:`, err));
+  }
 
   const getTrackInfo = () => {
     const title = document.querySelector(
@@ -34,24 +53,58 @@
     const artist = document.querySelector(
       ".byline.ytmusic-player-bar"
     )?.innerText;
+    const durationStr = document.querySelector(
+      "span.ytp-time-duration"
+    )?.innerText;
 
-    if (title && artist) {
-      const currentTrack = `${artist} - ${title}`;
+    if (!title || !artist) return null;
 
-      if (currentTrack !== lastTrack) {
-        lastTrack = currentTrack;
+    const durationSeconds = parseDuration(durationStr);
 
-        console.log("New track detected:", currentTrack);
+    return { artist, track: title, durationSeconds };
+  };
 
-        sendToBackend(artist, title);
+  const checkTrack = () => {
+    console.log("Polling for track info...");
+
+    const trackInfo = getTrackInfo();
+
+    if (!trackInfo) return;
+
+    const currentTrackKey = `${trackInfo.artist} - ${trackInfo.track}`;
+
+    if (currentTrackKey !== lastTrack) {
+      lastTrack = currentTrackKey;
+
+      if (scrobbleTimeout) {
+        clearTimeout(scrobbleTimeout);
+
+        scrobbleTimeout = null;
       }
+
+      sendToBackend("nowplaying", trackInfo.artist, trackInfo.track);
+
+      if (trackInfo.durationSeconds < MINIMUM_SCROBBLE_LENGTH_SECONDS) {
+        console.log(
+          "Track too short to scrobble:",
+          trackInfo.durationSeconds,
+          "seconds"
+        );
+        return;
+      }
+
+      const waitTimeSeconds = Math.min(
+        SCROBBLE_THRESHOLD_SECONDS,
+        Math.floor(trackInfo.durationSeconds / 2)
+      );
+
+      scrobbleTimeout = setTimeout(() => {
+        sendToBackend("scrobble", trackInfo.artist, trackInfo.track);
+
+        scrobbleTimeout = null;
+      }, waitTimeSeconds * 1000);
     }
   };
 
-  // Poll every 5 seconds
-  setInterval(() => {
-    console.log("Polling...");
-
-    getTrackInfo();
-  }, 5000);
+  setInterval(checkTrack, 5000);
 })();
