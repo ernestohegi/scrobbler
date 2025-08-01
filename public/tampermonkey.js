@@ -16,6 +16,8 @@
 
   const SCROBBLE_THRESHOLD_SECONDS = 120; // 2 minutes max
   const MINIMUM_SCROBBLE_LENGTH_SECONDS = 30; // minimum track length to scrobble
+
+  // Change this to your backend URL
   const BACKEND_URL = "http://localhost:3000";
 
   function parseDuration(durationStr) {
