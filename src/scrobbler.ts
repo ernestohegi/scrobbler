@@ -87,6 +87,14 @@ app.get("/auth", async (req, res) => {
   }
 });
 
+app.post("/scrobble", async (req, res) => {
+  if (!session) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  console.log("Received scrobble request:", req.body);
+});
+
 app.listen(PORT, () => {
   console.log(`Scrobbler is listening on port ${PORT}`);
 });
