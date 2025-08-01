@@ -1,6 +1,4 @@
-# Last.fm Scrobbler
-
-Scrobbler for YouTube Music.
+# Last.fm Scrobbler for YouTube Music
 
 Sends your YouTube Music listening history to Last.fm.
 
