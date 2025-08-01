@@ -1,4 +1,4 @@
-# scrobbler
+# Last.fm Scrobbler
 
 Scrobbler for YouTube Music.
 
