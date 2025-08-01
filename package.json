@@ -14,7 +14,9 @@
   "license": "ISC",
   "packageManager": "pnpm@10.11.0",
   "dependencies": {
+    "@types/cors": "^2.8.19",
     "@types/md5": "^2.3.5",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "md5": "^2.3.0",

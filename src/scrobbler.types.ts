@@ -9,3 +9,9 @@ export type Data = {
   message?: string;
   error?: number;
 };
+
+export type ScrobbleData = {
+  artist: string;
+  track: string;
+  timestamp: number;
+};
