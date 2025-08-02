@@ -16,13 +16,19 @@ These are required for the Last.fm API. You can get them by creating an applicat
 ### Local development
 
 1. Clone the repository
-2. Install dependencies:
+2. Copy `.env.example` to `.env` and fill in your Last.fm API credentials:
+
+```bash
+  cp .env.example .env
+```
+
+3. Install dependencies:
 
 ```bash
   pnpm install
 ```
 
-3. Run the development server:
+4. Run the development server:
 
 ```bash
   pnpm dev
@@ -93,12 +99,12 @@ This scripts sends scrobbles to the server when you listen to a song on YouTube 
 ## How to scrobble
 
 1. Start your application server (either in development or production mode).
-2. Install the Tampermonkey script in your browser.
-3. Visit http://localhost:3000, it will redirect you to the Last.fm authorization page.
-4. Authorize the application to access your Last.fm account.
-5. After authorization, you will be redirected back to the application with a token.
-6. This token will be used to scrobble your music listening history. It is stored locally for now, but the plan is to store it in a database soon. It doesn't have an expiration time, so it should work indefinitely unless you revoke access from Last.fm.
-7. Start listening to music on YouTube Music, and the scrobbles will be sent to Last.fm automatically.
+1. Install the Tampermonkey script in your browser.
+1. Visit http://localhost:3000, it will redirect you to the Last.fm authorization page.
+1. Authorize the application to access your Last.fm account.
+1. After authorization, you will be redirected back to the application with a token.
+1. This token will be used to scrobble your music listening history. It is stored locally for now, but the plan is to store it in a database soon. It doesn't have an expiration time, so it should work indefinitely unless you revoke access from Last.fm.
+1. Start listening to music on YouTube Music, and the scrobbles will be sent to Last.fm automatically.
 
 ## Next steps
 
