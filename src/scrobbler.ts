@@ -12,30 +12,36 @@ const AUTH_URL = "https://www.last.fm/api/auth/";
 const API_ENDPOINT = "https://ws.audioscrobbler.com/2.0/";
 const SHARED_SECRET = process.env.SHARED_SECRET!;
 
-const app = express();
+import { saveSession, loadSession } from "./utils/sessionStore.js";
+
+const generateApiSignature = (params: Record<string, string>): string => {
+  const concatenated = Object.keys(params)
+    .sort()
+    .map((key) => `${key}${params[key]}`)
+    .join("");
+
+  return md5(concatenated + SHARED_SECRET);
+};
 
 let currentSession: Session | null = null;
 
 console.log("Starting Scrobbler...");
 
+const app = express();
+
 app.use(express.json());
 app.use(cors());
 
-function generateApiSignature(params: Record<string, string>): string {
-  const concatenatedString = Object.keys(params)
-    .sort()
-    .map((key) => key + params[key])
-    .join("");
-
-  return md5(concatenatedString + SHARED_SECRET);
-}
+(async () => {
+  currentSession = await loadSession();
+  console.log("Loaded session:", currentSession);
+})();
 
 app.get("/", (req, res) => {
   if (currentSession) {
     res.json({ message: "Already authenticated", session: currentSession });
     return;
   }
-
   res.redirect(`${AUTH_URL}?api_key=${API_KEY}`);
 });
 
@@ -52,13 +58,11 @@ app.get("/auth", async (req, res) => {
   }
 
   const methodName = "auth.getSession";
-
   const signatureParameters: Record<string, string> = {
     api_key: API_KEY,
     method: methodName,
     token: token,
   };
-
   const apiSignature = generateApiSignature(signatureParameters);
 
   const urlSearchParams = new URLSearchParams({
@@ -74,7 +78,7 @@ app.get("/auth", async (req, res) => {
       `${API_ENDPOINT}?${urlSearchParams.toString()}`
     );
 
-    const data: Data = (await response.json()) as Data;
+    const data = (await response.json()) as Data;
 
     if (data.error) {
       return res.status(400).json({ error: data.message });
@@ -83,6 +87,10 @@ app.get("/auth", async (req, res) => {
     console.log("Authentication response from Last.fm:", data);
 
     currentSession = data.session || null;
+
+    if (currentSession) {
+      await saveSession(currentSession);
+    }
 
     res.json({
       message: "Authentication successful",
@@ -131,9 +139,7 @@ app.post("/scrobble", async (req, res) => {
   try {
     const response = await fetch(API_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: urlSearchParams.toString(),
     });
 
@@ -188,9 +194,7 @@ app.post("/nowplaying", async (req, res) => {
   try {
     const response = await fetch(API_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: urlSearchParams.toString(),
     });
 
