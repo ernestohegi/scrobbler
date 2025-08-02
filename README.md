@@ -58,6 +58,32 @@ These are required for the Last.fm API. You can get them by creating an applicat
   docker compose logs -f
 ```
 
+## Auth token storage
+
+The auth token is stored in memory for now, but you can implement a more persistent storage solution (e.g., a database) in the future.
+
+### Redis
+
+You can use Redis to store the auth token and other session data. This will allow you to easily scale your application and share session data between instances.
+
+You need to have Redis running locally or in a Docker container. You can use the official Redis image:
+
+```bash
+  sudo apt install redis-server
+```
+
+Check Redis is running:
+
+```bash
+  redis-cli ping
+```
+
+Check key is stored:
+
+```bash
+  redis-cli get lastfm_session
+```
+
 ### Tampermonkey script
 
 Install the [Tampermonkey](https://www.tampermonkey.net/) extension in your browser and add the script from `public/tampermonkey.js`.
