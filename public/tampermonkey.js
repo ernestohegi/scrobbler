@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralized fetcher
 // @author       Ernesto Hegi
 // @match        https://music.youtube.com/*
@@ -20,33 +20,48 @@
   // Change this to your backend URL
   const BACKEND_URL = "http://localhost:3000";
 
-  function parseDuration(durationStr) {
+  const parseDuration = (durationStr) => {
     if (!durationStr) return 0;
 
     const parts = durationStr.split(":").map(Number);
 
+    let length = 0;
+
     if (parts.length === 2) {
-      return parts[0] * 60 + parts[1];
+      // Handle MM:SS format
+      length = parts[0] * 60 + parts[1];
     } else if (parts.length === 3) {
-      return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      // Handle HH:MM:SS format
+      length = parts[0] * 3600 + parts[1] * 60 + parts[2];
     }
 
-    return 0;
-  }
+    return length;
+  };
 
-  function sendToBackend(endpoint, artist, track) {
+  const sendToBackend = async (endpoint, artist, track) => {
     console.log(`Sending to ${endpoint}:`, artist, track);
 
-    return fetch(`${BACKEND_URL}/${endpoint}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        artist,
-        track,
-        timestamp: Math.floor(Date.now() / 1000),
-      }),
-    }).catch((err) => console.error(`Failed to send to ${endpoint}:`, err));
-  }
+    try {
+      const response = await fetch(`${BACKEND_URL}/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          artist,
+          track,
+          timestamp: Math.floor(Date.now() / 1000),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+
+      console.log(`Response from ${endpoint}:`, data);
+    } catch (error) {
+      console.error(`Error sending to ${endpoint}:`, error);
+    }
+  };
 
   const getTrackInfo = () => {
     const title = document.querySelector(
