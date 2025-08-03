@@ -22,7 +22,6 @@ type ScrobbleData = {
   artist: string;
   track: string;
   duration: string;
-  timestamp: number;
 };
 
 const PORT = process.env.PORT || 3000;
@@ -128,13 +127,13 @@ app.post("/scrobble", async (req, res) => {
 
   const data = req.body as ScrobbleData;
 
-  if (!data || !data.artist || !data.track || !data.timestamp) {
+  if (!data || !data.artist || !data.track) {
     return res
       .status(400)
       .json({ error: "Missing required track information" });
   }
 
-  const { artist, track, timestamp } = data;
+  const { artist, track } = data;
 
   const scrobbleParameters: Record<string, string> = {
     method: METHOD_NAMES.TRACK_SCROBBLE,
@@ -142,7 +141,7 @@ app.post("/scrobble", async (req, res) => {
     sk: currentSession.key,
     artist: artist,
     track: track,
-    timestamp: `${timestamp}`,
+    timestamp: Math.floor(Date.now() / 1000),
   };
 
   const apiSignature = generateApiSignature(scrobbleParameters);
@@ -152,6 +151,8 @@ app.post("/scrobble", async (req, res) => {
     api_sig: apiSignature,
     format: "json",
   });
+
+  console.log({ urlSearchParams });
 
   try {
     const response = await fetch(API_ENDPOINT, {
@@ -205,11 +206,13 @@ app.post("/nowplaying", async (req, res) => {
     format: "json",
   });
 
+  console.log(urlSearchParams);
+
   try {
     const response = await fetch(API_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: urlSearchParams.toString(),
+      body: `${urlSearchParams}`,
     });
 
     const nowPlaying = (await response.json()) as Data;

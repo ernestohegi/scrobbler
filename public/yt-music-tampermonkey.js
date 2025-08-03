@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.12.1
+// @version      0.13.0
 // @license      MIT
 // @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralised fetcher
 // @author       Ernesto Hegi
@@ -93,8 +93,7 @@
 
     if (!artist || !track) {
       console.error(
-        `Artist and track must be provided: ${artist || UNKNOWN}, ${
-          track || UNKNOWN
+        `Artist and track must be provided: ${artist || UNKNOWN}, ${track || UNKNOWN
         }`
       );
       return;
@@ -110,7 +109,6 @@
           artist,
           track,
           duration,
-          timestamp: Math.floor(Date.now() / 1000),
         }),
       });
 
