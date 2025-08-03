@@ -1,6 +1,6 @@
-# Last.fm Scrobbler for YouTube Music
+# Last.fm Scrobbler
 
-Sends your YouTube Music listening history to Last.fm.
+Sends your music listening history to Last.fm.
 
 ## Environment variables
 
@@ -11,9 +11,9 @@ Sends your YouTube Music listening history to Last.fm.
 
 These are required for the Last.fm API. You can get them by creating an application on [Last.fm](https://www.last.fm/api/account/create).
 
-## How to run
+## Server
 
-### Local development
+### Local
 
 1. Clone the repository
 2. Copy `.env.example` to `.env` and fill in your Last.fm API credentials:
@@ -34,14 +34,14 @@ These are required for the Last.fm API. You can get them by creating an applicat
   pnpm dev
 ```
 
-### or run it with Docker
+#### or run it with Docker
 
 ```bash
   docker build -t scrobbler .
   docker run -p 3000:3000 --env-file .env scrobbler
 ```
 
-### Production build
+### Production
 
 #### Build the project:
 
@@ -55,7 +55,7 @@ These are required for the Last.fm API. You can get them by creating an applicat
   pnpm start
 ```
 
-### or use Docker compose
+#### or use Docker compose
 
 - Create a docker-compose.yml file in the root of the project and then:
 
@@ -64,9 +64,11 @@ These are required for the Last.fm API. You can get them by creating an applicat
   docker compose logs -f
 ```
 
-## Auth token storage
+## User (session) token
 
-The auth token is stored in memory for now, but you can implement a more persistent storage solution (e.g., a database) in the future.
+### Session token
+
+The session token is stored in memory for now, but you can implement a more persistent storage solution (e.g., a database) in the future.
 
 ### Redis
 
@@ -90,21 +92,28 @@ Check key is stored:
   redis-cli get lastfm_session
 ```
 
-### Tampermonkey script
+## Client
 
-Install the [Tampermonkey](https://www.tampermonkey.net/) extension in your browser and add the script from `public/tampermonkey.js`.
+### Tampermonkey
 
-This scripts sends scrobbles to the server when you listen to a song on YouTube Music.
+Install the [Tampermonkey](https://www.tampermonkey.net/) extension in your browser and add the script from the `/public` folder relevant to your music service.
 
-## How to scrobble
+Click on the Tampermonkey icon in your browser and select "Create a new script". Then, copy and paste the contents of the script file into the editor.
 
-1. Start your application server (either in development or production mode).
-1. Install the Tampermonkey script in your browser.
+### How to scrobble
+
+1. Start your server (either in development or production mode).
+1. Install the Tampermonkey extension in your browser.
+1. Add the Tampermonkey script for your service from `public/SERVICE_NAME-tampermonkey.js` to your Tampermonkey extension's dashboard.
 1. Visit http://localhost:3000, it will redirect you to the Last.fm authorization page.
 1. Authorize the application to access your Last.fm account.
 1. After authorization, you will be redirected back to the application with a token.
 1. This token will be used to scrobble your music listening history. It is stored locally for now, but the plan is to store it in a database soon. It doesn't have an expiration time, so it should work indefinitely unless you revoke access from Last.fm.
 1. Start listening to music on YouTube Music, and the scrobbles will be sent to Last.fm automatically.
+
+### YouTube Music
+
+So far we only support YouTube Music, but you can add support for other music services by creating a new Tampermonkey script and implementing the logic to fetch the currently playing track and send it to the server.
 
 ## Next steps
 

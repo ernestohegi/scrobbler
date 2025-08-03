@@ -4,15 +4,31 @@ import express from "express";
 import md5 from "md5";
 import cors from "cors";
 
-import type { Session, Data, ScrobbleData } from "./scrobbler.types.ts";
+import { saveSession, loadSession } from "./utils/sessionStore.js";
+
+type Session = {
+  name: string;
+  key: string;
+  subscriber: number;
+};
+
+type Data = {
+  session?: Session;
+  message?: string;
+  error?: number;
+};
+
+type ScrobbleData = {
+  artist: string;
+  track: string;
+  timestamp: number;
+};
 
 const PORT = process.env.PORT || 3000;
 const API_KEY = process.env.API_KEY!;
 const AUTH_URL = "https://www.last.fm/api/auth/";
 const API_ENDPOINT = "https://ws.audioscrobbler.com/2.0/";
 const SHARED_SECRET = process.env.SHARED_SECRET!;
-
-import { saveSession, loadSession } from "./utils/sessionStore.js";
 
 const generateApiSignature = (params: Record<string, string>): string => {
   const concatenated = Object.keys(params)
@@ -25,8 +41,6 @@ const generateApiSignature = (params: Record<string, string>): string => {
 
 let currentSession: Session | null = null;
 
-console.log("Starting Scrobbler...");
-
 const app = express();
 
 app.use(express.json());
@@ -34,8 +48,10 @@ app.use(cors());
 
 (async () => {
   currentSession = await loadSession();
-  console.log("Loaded session:", currentSession);
+  console.log("Loaded auth token.");
 })();
+
+console.log("Starting Scrobbler...");
 
 app.get("/", (req, res) => {
   if (currentSession) {
@@ -109,13 +125,18 @@ app.post("/scrobble", async (req, res) => {
     return res.status(401).json({ error: "Not authenticated" });
   }
 
-  if (!scrobbleData.artist || !scrobbleData.track || !scrobbleData.timestamp) {
+  if (
+    !scrobbleData ||
+    !scrobbleData.artist ||
+    !scrobbleData.track ||
+    !scrobbleData.timestamp
+  ) {
     return res
       .status(400)
       .json({ error: "Missing required track information" });
   }
 
-  const artistName = scrobbleData.artist.split("\n")[0].trim();
+  const { artist, track, timestamp } = scrobbleData;
 
   const methodName = "track.scrobble";
 
@@ -123,9 +144,9 @@ app.post("/scrobble", async (req, res) => {
     method: methodName,
     api_key: API_KEY,
     sk: currentSession.key,
-    artist: artistName,
-    track: scrobbleData.track,
-    timestamp: scrobbleData.timestamp.toString(),
+    artist: artist,
+    track: track,
+    timestamp: timestamp.toString(),
   };
 
   const apiSignature = generateApiSignature(scrobbleParameters);
