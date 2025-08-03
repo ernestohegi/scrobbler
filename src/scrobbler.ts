@@ -21,6 +21,7 @@ type Data = {
 type ScrobbleData = {
   artist: string;
   track: string;
+  duration: string;
   timestamp: number;
 };
 
@@ -141,7 +142,7 @@ app.post("/scrobble", async (req, res) => {
     sk: currentSession.key,
     artist: artist,
     track: track,
-    timestamp: timestamp.toString(),
+    timestamp: `${timestamp}`,
   };
 
   const apiSignature = generateApiSignature(scrobbleParameters);
@@ -156,7 +157,7 @@ app.post("/scrobble", async (req, res) => {
     const response = await fetch(API_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: urlSearchParams.toString(),
+      body: `${urlSearchParams}`,
     });
 
     const scrobble = (await response.json()) as Data;
@@ -185,14 +186,15 @@ app.post("/nowplaying", async (req, res) => {
       .json({ error: "Missing required track information" });
   }
 
-  const { artist, track } = data;
+  const { artist, track, duration } = data;
 
   const nowPlayingParameters: Record<string, string> = {
     method: METHOD_NAMES.TRACK_UPDATE_NOW_PLAYING,
     api_key: API_KEY,
     sk: currentSession.key,
-    artist: artist,
-    track: track,
+    artist,
+    track,
+    duration,
   };
 
   const apiSignature = generateApiSignature(nowPlayingParameters);

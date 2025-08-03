@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.11.1
+// @version      0.12.1
 // @license      MIT
 // @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralised fetcher
 // @author       Ernesto Hegi
@@ -29,7 +29,7 @@
   // Change this to your backend URL
   const BACKEND_URL = "http://localhost:3000";
 
-  const getDuration = (duration) => {
+  const getDurationInSeconds = (duration) => {
     if (!duration) return 0;
 
     // Handle "current / total" format (e.g. "0:38 / 4:20")
@@ -76,7 +76,7 @@
     return {
       artist: getArtist(artist),
       track: title,
-      duration: getDuration(duration),
+      duration: getDurationInSeconds(duration),
     };
   };
 
@@ -84,7 +84,7 @@
     const VALID_ENDPOINTS = Object.values(ENDPOINTS);
     const UNKNOWN = "unknown";
 
-    const { artist, track } = trackInfo || {};
+    const { artist, track, duration } = trackInfo || {};
 
     if (!VALID_ENDPOINTS.includes(endpoint)) {
       console.error(`Invalid endpoint: ${endpoint}`);
@@ -109,6 +109,7 @@
         body: JSON.stringify({
           artist,
           track,
+          duration,
           timestamp: Math.floor(Date.now() / 1000),
         }),
       });
