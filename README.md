@@ -74,10 +74,6 @@ The session token is used to authenticate scrobbles to Last.fm. It is generated 
 - After authorization, you will be redirected back to the application with a token.
 - This token will be used to scrobble your music listening history. It is stored in memory for now, but the plan is to store it in a database soon. It doesn't have an expiration time, so it should work indefinitely unless you revoke access from Last.fm.
 
-### Session token
-
-The session token is stored in memory for now, but you can implement a more persistent storage solution (e.g., a database) in the future.
-
 ### Redis
 
 You can use Redis to store the auth token and other session data. This will allow you to easily scale your application and share session data between instances.

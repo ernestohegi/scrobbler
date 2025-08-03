@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.10.0
+// @version      0.11.1
+// @license      MIT
 // @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralised fetcher
 // @author       Ernesto Hegi
 // @match        https://music.youtube.com/*
@@ -11,6 +12,8 @@
 
 (function () {
   "use strict";
+
+  console.log("YouTube Music Last.fm Scrobbler");
 
   let lastTrack = "";
   let scrobbleTimeout = null;
@@ -73,7 +76,7 @@
     return {
       artist: getArtist(artist),
       track: title,
-      durationSeconds: getDuration(duration),
+      duration: getDuration(duration),
     };
   };
 
@@ -99,8 +102,6 @@
 
     const ENDPOINT_URL = `${BACKEND_URL}/${endpoint}`;
 
-    console.log(`Sending to ${ENDPOINT_URL}: ${artist} - ${track}`);
-
     try {
       const response = await fetch(ENDPOINT_URL, {
         method: "POST",
@@ -115,36 +116,21 @@
       if (!response.ok) {
         throw new Error(`Error status ${response.status} from ${ENDPOINT_URL}`);
       }
-
-      const data = await response.json();
-
-      console.log(`Response from ${ENDPOINT_URL}: ${data}`);
     } catch (error) {
       console.error(`Error sending to ${ENDPOINT_URL}: ${error}`);
     }
   };
 
   setInterval(async () => {
-    console.log("YouTube Music Last.fm Scrobbler");
-    console.log("Polling for track info...");
-
     const trackInfo = getTrackInfo();
 
-    if (!trackInfo) {
-      console.log("No track info found. Skipping scrobble.");
-      return;
-    }
+    if (!trackInfo) return;
 
     const { artist, track, duration } = trackInfo;
 
-    // TODO consider wether we want to set now playing for tracks
-    // that are shorter than the scrobble threshold and won't count
-    // towards scrobbling.
-    await sendToBackend(ENDPOINTS.NOW_PLAYING, trackInfo);
-
     const currentTrackKey = `${artist} - ${track}`;
 
-    if (currentTrackKey !== lastTrack) return false;
+    if (currentTrackKey === lastTrack) return;
 
     lastTrack = currentTrackKey;
 
@@ -153,11 +139,13 @@
       scrobbleTimeout = null;
     }
 
+    // TODO consider wether we want to set now playing for tracks
+    // that are shorter than the scrobble threshold and won't count
+    // towards scrobbling.
+    await sendToBackend(ENDPOINTS.NOW_PLAYING, trackInfo);
+
     // Tracks shorter than 30 seconds should not be scrobbled.
-    if (duration < MINIMUM_SCROBBLE_LENGTH_SECONDS) {
-      console.log(`Track too short to scrobble: ${duration} seconds`);
-      return;
-    }
+    if (duration < MINIMUM_SCROBBLE_LENGTH_SECONDS) return;
 
     // Track has played for at least half its duration
     // or the scrobble threshold, whichever is smaller.
@@ -165,6 +153,8 @@
       SCROBBLE_THRESHOLD_SECONDS,
       Math.floor(duration / 2)
     );
+
+    if (!scrobbleWaitTimeInSeconds) return;
 
     // This will trigger the scrobble after the wait time.
     scrobbleTimeout = setTimeout(async () => {

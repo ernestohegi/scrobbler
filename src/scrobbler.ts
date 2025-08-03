@@ -29,6 +29,11 @@ const API_KEY = process.env.API_KEY!;
 const AUTH_URL = "https://www.last.fm/api/auth/";
 const API_ENDPOINT = "https://ws.audioscrobbler.com/2.0/";
 const SHARED_SECRET = process.env.SHARED_SECRET!;
+const METHOD_NAMES = {
+  AUTH_GET_SESSION: "auth.getSession",
+  TRACK_SCROBBLE: "track.scrobble",
+  TRACK_UPDATE_NOW_PLAYING: "track.updateNowPlaying",
+};
 
 const generateApiSignature = (params: Record<string, string>): string => {
   const concatenated = Object.keys(params)
@@ -73,16 +78,15 @@ app.get("/auth", async (req, res) => {
     return res.status(400).json({ error: "Token is required" });
   }
 
-  const methodName = "auth.getSession";
   const signatureParameters: Record<string, string> = {
     api_key: API_KEY,
-    method: methodName,
+    method: METHOD_NAMES.AUTH_GET_SESSION,
     token: token,
   };
   const apiSignature = generateApiSignature(signatureParameters);
 
   const urlSearchParams = new URLSearchParams({
-    method: methodName,
+    method: METHOD_NAMES.AUTH_GET_SESSION,
     api_key: API_KEY,
     token: token,
     api_sig: apiSignature,
@@ -99,8 +103,6 @@ app.get("/auth", async (req, res) => {
     if (data.error) {
       return res.status(400).json({ error: data.message });
     }
-
-    console.log("Authentication response from Last.fm:", data);
 
     currentSession = data.session || null;
 
@@ -119,29 +121,22 @@ app.get("/auth", async (req, res) => {
 });
 
 app.post("/scrobble", async (req, res) => {
-  const scrobbleData = req.body as ScrobbleData;
-
   if (!currentSession) {
     return res.status(401).json({ error: "Not authenticated" });
   }
 
-  if (
-    !scrobbleData ||
-    !scrobbleData.artist ||
-    !scrobbleData.track ||
-    !scrobbleData.timestamp
-  ) {
+  const data = req.body as ScrobbleData;
+
+  if (!data || !data.artist || !data.track || !data.timestamp) {
     return res
       .status(400)
       .json({ error: "Missing required track information" });
   }
 
-  const { artist, track, timestamp } = scrobbleData;
-
-  const methodName = "track.scrobble";
+  const { artist, track, timestamp } = data;
 
   const scrobbleParameters: Record<string, string> = {
-    method: methodName,
+    method: METHOD_NAMES.TRACK_SCROBBLE,
     api_key: API_KEY,
     sk: currentSession.key,
     artist: artist,
@@ -164,15 +159,13 @@ app.post("/scrobble", async (req, res) => {
       body: urlSearchParams.toString(),
     });
 
-    const data = (await response.json()) as Data;
+    const scrobble = (await response.json()) as Data;
 
-    console.log("Last.fm scrobble response:", data);
-
-    if (data.error) {
-      return res.status(400).json({ error: data.message });
+    if (scrobble.error) {
+      return res.status(400).json({ error: scrobble.message });
     }
 
-    res.json({ message: "Track scrobbled successfully", data });
+    res.json({ message: "Track scrobbled successfully", scrobble });
   } catch (error) {
     console.error("Error sending scrobble request:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -180,28 +173,26 @@ app.post("/scrobble", async (req, res) => {
 });
 
 app.post("/nowplaying", async (req, res) => {
-  const nowPlayingData = req.body as ScrobbleData;
-
   if (!currentSession) {
     return res.status(401).json({ error: "Not authenticated" });
   }
 
-  if (!nowPlayingData.artist || !nowPlayingData.track) {
+  const data = req.body as ScrobbleData;
+
+  if (!data.artist || !data.track) {
     return res
       .status(400)
       .json({ error: "Missing required track information" });
   }
 
-  const artistName = nowPlayingData.artist.split("\n")[0].trim();
-
-  const methodName = "track.updateNowPlaying";
+  const { artist, track } = data;
 
   const nowPlayingParameters: Record<string, string> = {
-    method: methodName,
+    method: METHOD_NAMES.TRACK_UPDATE_NOW_PLAYING,
     api_key: API_KEY,
     sk: currentSession.key,
-    artist: artistName,
-    track: nowPlayingData.track,
+    artist: artist,
+    track: track,
   };
 
   const apiSignature = generateApiSignature(nowPlayingParameters);
@@ -219,13 +210,13 @@ app.post("/nowplaying", async (req, res) => {
       body: urlSearchParams.toString(),
     });
 
-    const data = (await response.json()) as Data;
+    const nowPlaying = (await response.json()) as Data;
 
-    if (data.error) {
-      return res.status(400).json({ error: data.message });
+    if (nowPlaying.error) {
+      return res.status(400).json({ error: nowPlaying.message });
     }
 
-    res.json({ message: "Now playing updated", data });
+    res.json({ message: "Now playing updated", nowPlaying });
   } catch (error) {
     console.error("Error updating now playing:", error);
     res.status(500).json({ error: "Internal server error" });
