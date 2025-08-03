@@ -66,6 +66,14 @@ These are required for the Last.fm API. You can get them by creating an applicat
 
 ## User (session) token
 
+The session token is used to authenticate scrobbles to Last.fm. It is generated when you authorize the application to access your Last.fm account.
+
+- After your server is running, visit http://localhost:3000.
+- You will be redirected to the Last.fm authorization page.
+- Authorize the application to access your Last.fm account.
+- After authorization, you will be redirected back to the application with a token.
+- This token will be used to scrobble your music listening history. It is stored in memory for now, but the plan is to store it in a database soon. It doesn't have an expiration time, so it should work indefinitely unless you revoke access from Last.fm.
+
 ### Session token
 
 The session token is stored in memory for now, but you can implement a more persistent storage solution (e.g., a database) in the future.
