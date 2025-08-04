@@ -21,6 +21,7 @@ type Data = {
 type ScrobbleData = {
   artist: string;
   track: string;
+  album: string;
   duration: string;
 };
 
@@ -133,7 +134,7 @@ app.post("/scrobble", async (req, res) => {
       .json({ error: "Missing required track information" });
   }
 
-  const { artist, track } = data;
+  const { artist, track, album } = data;
 
   const scrobbleParameters: Record<string, string> = {
     method: METHOD_NAMES.TRACK_SCROBBLE,
@@ -141,14 +142,13 @@ app.post("/scrobble", async (req, res) => {
     sk: currentSession.key,
     artist: artist,
     track: track,
-    timestamp: Math.floor(Date.now() / 1000),
+    album: album,
+    timestamp: `${Math.floor(Date.now() / 1000)}`,
   };
-
-  const apiSignature = generateApiSignature(scrobbleParameters);
 
   const urlSearchParams = new URLSearchParams({
     ...scrobbleParameters,
-    api_sig: apiSignature,
+    api_sig: generateApiSignature(scrobbleParameters),
     format: "json",
   });
 
@@ -187,7 +187,7 @@ app.post("/nowplaying", async (req, res) => {
       .json({ error: "Missing required track information" });
   }
 
-  const { artist, track, duration } = data;
+  const { artist, track, album, duration } = data;
 
   const nowPlayingParameters: Record<string, string> = {
     method: METHOD_NAMES.TRACK_UPDATE_NOW_PLAYING,
@@ -196,13 +196,12 @@ app.post("/nowplaying", async (req, res) => {
     artist,
     track,
     duration,
+    album,
   };
-
-  const apiSignature = generateApiSignature(nowPlayingParameters);
 
   const urlSearchParams = new URLSearchParams({
     ...nowPlayingParameters,
-    api_sig: apiSignature,
+    api_sig: generateApiSignature(nowPlayingParameters),
     format: "json",
   });
 

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.13.0
+// @version      0.13.1
 // @license      MIT
 // @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralised fetcher
 // @author       Ernesto Hegi
@@ -52,12 +52,6 @@
     return length;
   };
 
-  const getArtist = (artist) => {
-    if (!artist) return "";
-
-    return artist.split("\n")[0].trim();
-  };
-
   const getFieldValue = (classNameSelector) => {
     const element = document.querySelector(
       `.ytmusic-player-bar${classNameSelector}`
@@ -67,24 +61,30 @@
   };
 
   const getTrackInfo = () => {
-    const title = getFieldValue(".title");
-    const artist = getFieldValue(".byline");
+    const track = getFieldValue(".title");
+    const byline = getFieldValue(".byline");
     const duration = getFieldValue(".time-info");
 
-    if (!title || !artist || !duration) return null;
+    if (!track || !byline || !duration) return null;
+
+    // byline is usually in the format "Artist • Album • Year"
+    const [artist, album] = byline
+      .replace(/ • /g, "")
+      .split("\n")
+      .filter(Boolean);
 
     return {
-      artist: getArtist(artist),
-      track: title,
+      artist,
+      album,
+      track,
       duration: getDurationInSeconds(duration),
     };
   };
 
   const sendToBackend = async (endpoint, trackInfo) => {
     const VALID_ENDPOINTS = Object.values(ENDPOINTS);
-    const UNKNOWN = "unknown";
 
-    const { artist, track, duration } = trackInfo || {};
+    const { artist, track } = trackInfo || {};
 
     if (!VALID_ENDPOINTS.includes(endpoint)) {
       console.error(`Invalid endpoint: ${endpoint}`);
@@ -92,10 +92,7 @@
     }
 
     if (!artist || !track) {
-      console.error(
-        `Artist and track must be provided: ${artist || UNKNOWN}, ${track || UNKNOWN
-        }`
-      );
+      console.error("Artist and track must be provided");
       return;
     }
 
@@ -105,11 +102,7 @@
       const response = await fetch(ENDPOINT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          artist,
-          track,
-          duration,
-        }),
+        body: JSON.stringify(trackInfo),
       });
 
       if (!response.ok) {
