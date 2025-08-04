@@ -124,4 +124,3 @@ So far we only support YouTube Music, but you can add support for other music se
 - Check for invalid tokens and reauthorize if necessary.
 - Store tokens in a database. SQLite with Turso or Postgres with Prisma.
 - Add a settings page to manage tokens and preferences.
-- Add dummy docker-compose.yml file.

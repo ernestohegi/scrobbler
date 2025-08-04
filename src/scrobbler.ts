@@ -54,7 +54,12 @@ app.use(cors());
 
 (async () => {
   currentSession = await loadSession();
-  console.log("Loaded auth token.");
+
+  if (currentSession) {
+    console.log(`Loaded session for user: ${currentSession.name}`);
+  } else {
+    console.log(`No session found, please log in.`);
+  }
 })();
 
 console.log("Starting Scrobbler...");
@@ -152,7 +157,7 @@ app.post("/scrobble", async (req, res) => {
     format: "json",
   });
 
-  console.log({ urlSearchParams });
+  console.log(`Scrobbled.`);
 
   try {
     const response = await fetch(API_ENDPOINT, {
@@ -205,7 +210,7 @@ app.post("/nowplaying", async (req, res) => {
     format: "json",
   });
 
-  console.log(urlSearchParams);
+  console.log(`Updating now playing: ${artist} - ${album} - ${track}`);
 
   try {
     const response = await fetch(API_ENDPOINT, {

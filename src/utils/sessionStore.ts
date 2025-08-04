@@ -1,6 +1,12 @@
 import { Redis } from "ioredis";
 
-const redis = new Redis();
+const redisHost = process.env.REDIS_HOST || "localhost";
+const redisPort = Number(process.env.REDIS_PORT) || 6379;
+
+const redis = new Redis({
+  host: redisHost,
+  port: redisPort,
+});
 
 const SESSION_KEY = "lastfm_session";
 
