@@ -1,6 +1,8 @@
 services:
   redis:
     image: redis:latest
+    container_name: redis
+    restart: unless-stopped
     volumes:
       - redis-data:/data
 
