@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     volumes:
       - redis-data:/data
+    command: ["redis-server", "--loglevel", "warning"]
 
   scrobbler:
     image: ghcr.io/ernestohegi/scrobbler:latest

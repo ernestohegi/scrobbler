@@ -122,6 +122,7 @@
 
     const currentTrackKey = `${artist} - ${track}`;
 
+    // TODO allow for track duplicates
     if (currentTrackKey === lastTrack) return;
 
     lastTrack = currentTrackKey;

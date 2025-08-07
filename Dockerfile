@@ -9,12 +9,12 @@ RUN pnpm install --offline
 
 FROM dependencies AS build
 COPY . .
-RUN pnpm exec tsc
+RUN pnpm build
 
 FROM base AS production
 COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=build /app/dist ./built
+COPY --from=build /app/dist ./dist
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
-CMD ["node", "built/scrobbler.js"]
+CMD ["node", "dist/scrobbler.js"]
