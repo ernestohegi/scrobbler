@@ -1,13 +1,21 @@
-import { generateApiSignature } from "./generateApiSignature.js";
+import { Request, Response } from "express";
+
+import { loadSession, saveSession } from "../utils/sessionStore.js";
+import { generateApiSignature } from "../utils/generateApiSignature.js";
 import { METHOD_NAMES } from "../scrobbler.consts.js";
-import { saveSession } from "./sessionStore.js";
-import { HandleAuth } from "./handleAuth.types.js";
 import { Data } from "../scrobbler.types.js";
 
 const API_KEY = process.env.API_KEY!;
 const API_ENDPOINT = "https://ws.audioscrobbler.com/2.0/";
 
-export const handleAuth = async ({ req, res }: HandleAuth) => {
+export const AuthRoute = async (req: Request, res: Response) => {
+  const currentSession = await loadSession();
+
+  if (currentSession) {
+    res.json({ message: "Already authenticated", session: currentSession });
+    return;
+  }
+
   const token = req.query.token as string;
 
   if (!token) {
