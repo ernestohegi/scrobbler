@@ -13,8 +13,9 @@ RUN pnpm build
 
 FROM base AS production
 COPY --from=dependencies /app/node_modules ./node_modules
+COPY --from=dependencies /app/package.json ./
 COPY --from=build /app/dist ./dist
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
-CMD ["node", "dist/scrobbler.js"]
+CMD ["pnpm", "start"]
