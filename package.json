@@ -5,9 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/scrobbler.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/scrobbler.js"
+    "start": "node dist/server.js",
+    "test": "vitest",
+    "tdd": "vitest --watch"
   },
   "keywords": [],
   "author": "",
@@ -26,8 +28,12 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^24.1.0",
+    "@types/supertest": "^6.0.3",
+    "msw": "^2.10.4",
+    "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   }
 }

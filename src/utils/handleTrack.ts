@@ -39,7 +39,10 @@ export const handleTrack = async ({
       return res.status(400).json({ error: scrobble.message });
     }
 
-    res.json({ message: "Track scrobbled successfully", scrobble });
+    res.json({
+      message: `Track scrobbled successfully with method: ${method}`,
+      scrobbleData,
+    });
   } catch (error) {
     console.error("Error sending scrobble request:", error);
 

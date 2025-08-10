@@ -22,7 +22,7 @@
   const MINIMUM_SCROBBLE_LENGTH_SECONDS = 30; // minimum track length to scrobble
   const POLLING_INTERVAL_MS = 5000; // 5 seconds
   const ENDPOINTS = {
-    NOW_PLAYING: "nowplaying",
+    NOW_PLAYING: "now-playing",
     SCROBBLE: "scrobble",
   };
 
