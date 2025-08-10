@@ -13,9 +13,9 @@ export const NowPlayingRoute = async (req: Request, res: Response) => {
   }
 
   // Parse the reuest with Zod to confirm the data structure.
-  const scrobbleData = req.body as ScrobbleData;
+  const scrobbleData = (req.body as ScrobbleData) || {};
 
-  if (!scrobbleData.artist || !scrobbleData.track) {
+  if (!scrobbleData.artist || !scrobbleData.track || !scrobbleData.album) {
     return res
       .status(400)
       .json({ error: "Missing required track information" });
