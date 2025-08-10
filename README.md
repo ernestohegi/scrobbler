@@ -1,6 +1,6 @@
 # Last.fm Scrobbler
 
-Sends your music listening history to Last.fm.
+Sends your music listening history to [Last.fm](https://www.last.fm).
 
 ## Environment variables
 
@@ -13,28 +13,32 @@ These are required for the Last.fm API. You can get them by creating an applicat
 
 ## Server
 
+Build and run manually or use `docker`. If you go with docker, you need to install Redis locally. If you use `docker compose`, it will be handled for you.
+
 ### Local
 
 1. Clone the repository
-2. Copy `.env.example` to `.env` and fill in your Last.fm API credentials:
+1. Copy `.env.example` to `.env` and fill in your Last.fm API credentials:
 
 ```bash
   cp .env.example .env
 ```
 
-3. Install dependencies:
+#### Manually install and run the project
+
+1. Install dependencies:
 
 ```bash
   pnpm install
 ```
 
-4. Run the development server:
+2. Run the development server:
 
 ```bash
   pnpm dev
 ```
 
-#### or run it with Docker
+#### Docker
 
 ```bash
   docker build -t scrobbler .
@@ -43,24 +47,31 @@ These are required for the Last.fm API. You can get them by creating an applicat
 
 ### Production
 
-#### Build the project:
+Build and run manually or use `docker compose`.
+
+#### Manually install, build and run the project
+
+```bash
+  pnpm install
+```
 
 ```bash
   pnpm build
 ```
 
-#### Run the project:
-
 ```bash
   pnpm start
 ```
 
-#### or use Docker compose
-
-- Create a docker-compose.yml file in the root of the project and then:
+#### Docker compose
 
 ```bash
   docker compose up -d
+```
+
+Tail logs with:
+
+```bash
   docker compose logs -f
 ```
 
@@ -76,9 +87,9 @@ The session token is used to authenticate scrobbles to Last.fm. It is generated 
 
 ### Redis
 
-You can use Redis to store the auth token and other session data. This will allow you to easily scale your application and share session data between instances.
+We use [Redis](https://redis.io/) to store the session data received from Last.fm containing the user session auth token.
 
-You need to have Redis running locally or in a Docker container. You can use the official Redis image:
+You need to have Redis running locally or in a Docker container (already provided in the Docker setup through the docker-compose.yml file). You can use the official Redis image:
 
 ```bash
   sudo apt install redis-server
@@ -106,14 +117,24 @@ Click on the Tampermonkey icon in your browser and select "Create a new script".
 
 ### How to scrobble
 
-1. Start your server (either in development or production mode).
+#### Setup
+
+1. Start your server.
 1. Install the Tampermonkey extension in your browser.
-1. Add the Tampermonkey script for your service from `public/SERVICE_NAME-tampermonkey.js` to your Tampermonkey extension's dashboard.
+1. Add the Tampermonkey script for the service you use from `public/SERVICE_NAME-tampermonkey.js` to your Tampermonkey extension's dashboard.
+
+#### Authorization
+
 1. Visit http://localhost:3000, it will redirect you to the Last.fm authorization page.
 1. Authorize the application to access your Last.fm account.
-1. After authorization, you will be redirected back to the application with a token.
-1. This token will be used to scrobble your music listening history. It is stored locally for now, but the plan is to store it in a database soon. It doesn't have an expiration time, so it should work indefinitely unless you revoke access from Last.fm.
-1. Start listening to music on YouTube Music, and the scrobbles will be sent to Last.fm automatically.
+1. After authorization, you will be redirected back to the application, to `/auth`, with a token.
+1. This token will be used to scrobble your music listening history. It is stored locally on your machine with **Redis**, but the plan is to store it in a database soon so it can be managed if necessary.
+1. The Last.fm user token doesn't have an expiration time, so it should work indefinitely unless you revoke access from Last.fm to the app itself.
+
+#### Scrobble
+
+1. Finally, the most important part, start listening to music on your music service.
+1. The scrobbles will be sent to Last.fm automatically.
 
 ### YouTube Music
 

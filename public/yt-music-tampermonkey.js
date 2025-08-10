@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.13.1
+// @version      0.14.0
 // @license      MIT
 // @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralised fetcher
 // @author       Ernesto Hegi
