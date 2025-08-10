@@ -23,12 +23,10 @@ describe("scrobbler", () => {
   beforeAll(() => {
     server.listen({
       onUnhandledRequest(request, print) {
-        // Do not print warnings on unhandled requests to our app.
         if (request.url.includes(SERVER_URL)) {
           return;
         }
 
-        // Print the regular MSW unhandled request warning otherwise.
         print.warning();
       },
     });
@@ -48,14 +46,6 @@ describe("scrobbler", () => {
   afterAll(() => server.close());
 
   describe("routes", () => {
-    // test("home", () => {
-    //   // Test implementation goes here
-    // });
-
-    // test("auth", () => {
-    //   // Test implementation goes here
-    // });
-
     test("scrobble", async () => {
       const response = await request(app)
         .post("/scrobble")
