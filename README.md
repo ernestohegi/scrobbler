@@ -66,7 +66,7 @@ Build and run manually or use `docker compose`.
 #### Docker compose
 
 ```bash
-  docker compose up -d
+  docker compose up -d --pull always
 ```
 
 Tail logs with:
