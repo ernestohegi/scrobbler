@@ -14,7 +14,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-console.log("Starting Scrobbler...");
+console.log("Starting Last.fm Scrobbler...");
 
 app.get("/", HomeRoute);
 
