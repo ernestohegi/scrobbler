@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Music Scrobbler
 // @namespace    http://tampermonkey.net/
-// @version      0.14.0
+// @version      0.14.1
 // @license      MIT
 // @description  Send YouTube Music tracks to your Last.fm scrobbler backend with centralised fetcher
 // @author       Ernesto Hegi
@@ -81,7 +81,7 @@
     };
   };
 
-  const sendToBackend = async (endpoint, trackInfo) => {
+  const postTrackInfo = async (endpoint, trackInfo) => {
     const VALID_ENDPOINTS = Object.values(ENDPOINTS);
 
     const { artist, track } = trackInfo || {};
@@ -135,7 +135,7 @@
     // TODO consider wether we want to set now playing for tracks
     // that are shorter than the scrobble threshold and won't count
     // towards scrobbling.
-    await sendToBackend(ENDPOINTS.NOW_PLAYING, trackInfo);
+    await postTrackInfo(ENDPOINTS.NOW_PLAYING, trackInfo);
 
     // Tracks shorter than 30 seconds should not be scrobbled.
     if (duration < MINIMUM_SCROBBLE_LENGTH_SECONDS) return;
@@ -151,7 +151,7 @@
 
     // This will trigger the scrobble after the wait time.
     scrobbleTimeout = setTimeout(async () => {
-      await sendToBackend(ENDPOINTS.SCROBBLE, trackInfo);
+      await postTrackInfo(ENDPOINTS.SCROBBLE, trackInfo);
 
       scrobbleTimeout = null;
     }, scrobbleWaitTimeInSeconds * 1000);
