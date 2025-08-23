@@ -16,6 +16,6 @@ jobs:
       - name: Install PNPM
         uses: pnpm/action-setup@v4
       - name: Install dependencies
-        run: pnpm ci
+        run: pnpm i
       - name: Run tests
         run: pnpm test
