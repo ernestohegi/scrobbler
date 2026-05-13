@@ -9,7 +9,7 @@ Sends your music listening history to [Last.fm](https://www.last.fm).
   SHARED_SECRET=your_shared_secret
 ```
 
-These are required for the Last.fm API. You can get them by creating an application on [Last.fm](https://www.last.fm/api/account/create).
+These are required for the Last.fm API. You can get them by creating an application on [Last.fm](https://www.last.fm/api/account/create). When setting up the app, set the callback URL to `http://localhost:3000/auth`.
 
 ## Server
 
