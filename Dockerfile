@@ -9,7 +9,7 @@ FROM base AS dependencies
 
 WORKDIR /app
 
-COPY ["package.json", "pnpm-lock.yaml", "./"]
+COPY ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "./"]
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
@@ -23,6 +23,7 @@ FROM base AS production
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/package.json ./
+COPY --from=dependencies /app/pnpm-workspace.yaml ./
 COPY --from=build /app/dist ./dist
 
 ENV NODE_ENV=production
