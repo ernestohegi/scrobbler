@@ -13,7 +13,7 @@ services:
     image: ghcr.io/ernestohegi/scrobbler:latest
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3847:3847"
     networks:
       - scrobbler-net
     env_file:

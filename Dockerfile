@@ -26,8 +26,8 @@ COPY --from=dependencies /app/package.json ./
 COPY --from=build /app/dist ./dist
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3847
 
-EXPOSE 3000
+EXPOSE 3847
 
 CMD ["pnpm", "start"]
