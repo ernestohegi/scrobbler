@@ -2,7 +2,7 @@ import app from "./scrobbler.js";
 
 import { loadSession } from "./utils/sessionStore.js";
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3847;
 
 app.listen(PORT, async () => {
   console.log(`Scrobbler is listening on port ${PORT}`);

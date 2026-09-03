@@ -9,7 +9,7 @@ Sends your music listening history to [Last.fm](https://www.last.fm).
   SHARED_SECRET=your_shared_secret
 ```
 
-These are required for the Last.fm API. You can get them by creating an application on [Last.fm](https://www.last.fm/api/account/create). When setting up the app, set the callback URL to `http://localhost:3000/auth`.
+These are required for the Last.fm API. You can get them by creating an application on [Last.fm](https://www.last.fm/api/account/create). When setting up the app, set the callback URL to `http://localhost:3847/auth`.
 
 ## Server
 
@@ -42,7 +42,7 @@ Build and run manually or use `docker`. If you go with docker, you need to insta
 
 ```bash
   docker build -t scrobbler .
-  docker run -p 3000:3000 --env-file .env scrobbler
+  docker run -p 3847:3847 --env-file .env scrobbler
 ```
 
 ### Production
@@ -79,7 +79,7 @@ Tail logs with:
 
 The session token is used to authenticate scrobbles to Last.fm. It is generated when you authorize the application to access your Last.fm account.
 
-- After your server is running, visit http://localhost:3000.
+- After your server is running, visit http://localhost:3847.
 - You will be redirected to the Last.fm authorization page.
 - Authorize the application to access your Last.fm account.
 - After authorization, you will be redirected back to the application with a token.
@@ -125,7 +125,7 @@ Click on the Tampermonkey icon in your browser and select "Create a new script".
 
 #### Authorization
 
-1. Visit http://localhost:3000, it will redirect you to the Last.fm authorization page.
+1. Visit http://localhost:3847, it will redirect you to the Last.fm authorization page.
 1. Authorize the application to access your Last.fm account.
 1. After authorization, you will be redirected back to the application, to `/auth`, with a token.
 1. This token will be used to scrobble your music listening history. It is stored locally on your machine with **Redis**, but the plan is to store it in a database soon so it can be managed if necessary.

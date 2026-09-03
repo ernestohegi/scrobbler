@@ -27,7 +27,7 @@
   };
 
   // Change this to your backend URL
-  const BACKEND_URL = "http://localhost:3000";
+  const BACKEND_URL = "http://localhost:3847";
 
   const getDurationInSeconds = (duration) => {
     if (!duration) return 0;
