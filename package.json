@@ -31,7 +31,7 @@
     "@types/node": "^26.0.0",
     "@types/supertest": "^7.0.0",
     "@vitest/ui": "^5.0.0",
-    "msw": "^2.10.4",
+    "msw": "^3.0.0",
     "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
